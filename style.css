@@ -12,7 +12,25 @@
     overflow-x: hidden; /* 화면이 좌우로 찢어져서 스크롤되는 현상 차단 */
   }
 
+  /* 2. 왼쪽 사이드바 (폴더 목록) */
+  /* .sidebar-left {
+    width: 100% !important;
+    max-height: 150px;
+    overflow-y: auto;
+    border-right: none;
+    border-bottom: 1px solid #3c3c3c;
+  } */
 
+  /* 3. 오른쪽 사이드바 (정보창 등) */
+  /* 열렸을 때 화면 전체를 덮거나 메모창 아래로 밀리도록 설정하여 잘림 방지 */
+  /* .sidebar-right {
+    width: 100% !important;
+    height: auto;
+    max-height: 200px;
+    overflow-y: auto;
+    border-left: none;
+    border-top: 1px solid #3c3c3c;
+  } */
   /* 4. 핵심: 중앙 메모 입력창 영역 조절 */
   .memo-form {
     width: 100% !important;
@@ -262,7 +280,7 @@ body {
 /* 폴더 대시보드 전체 틀 (자바스크립트의 flex 제어와 유기적 연동) */
 .folder-dashboard {
   width: 100%;
-  max-width: 900px; /* 125% 환경을 고려하여 가로폭을 여유롭게 확장 */
+  max-width: 1200px; /* 125% 환경을 고려하여 가로폭을 여유롭게 확장 */
   display: flex;
   flex-direction: column;
   height: 100%;
@@ -279,7 +297,7 @@ body {
 .dashboard-desc {
   font-size: 18px; /* 안내 문구 가독성 확대 */
   color: #858585;
-  margin-bottom: 40px; /* 설명 문구와 아래 카드 그리드 사이의 세로 간격 축소 */
+  margin-bottom: 50px; /* 설명 문구와 아래 카드 그리드 사이의 세로 간격 축소 */
 }
 
 /* 파일들을 카드 형태로 배치할 그리드 */
@@ -290,6 +308,7 @@ body {
   row-gap: 60px;
   column-gap: 20px;
   overflow-y: auto; /* 메모 카드가 많아지면 중앙 영역 내부에서만 부드럽게 스크롤 */
+  padding-top: 6px;
   padding-bottom: 40px;
 }
 
@@ -314,25 +333,35 @@ body {
   transform: translateY(-2px); /* 카드가 살짝 떠오르는 시각 효과 추가 */
 }
 
+/* 2. 제목 스타일 수정 (flex-shrink 추가로 절대 안 밀리게 고정) */
 .file-card h3 {
-  font-size: 22px; /* 카드 내 제목 크기 확대 */
+  display: flex;
+  font-size: 20px; 
   color: white;
   margin-bottom: 12px;
   white-space: nowrap;
   overflow: hidden;
-  text-overflow: ellipsis; /* 제목이 길면 자동으로 ... 처리 */
+  text-overflow: ellipsis; 
   font-weight: 600;
+  
+  /* 본문이 길어져도 제목 크기가 절대 압축되거나 밀리지 않도록 고정 */
+  flex-shrink: 0; 
 }
 
 .file-card p {
-  font-size: 16px; /* 카드 내 본문 요약 크기 확대 */
+  font-size: 16px; 
   color: #aaaaaa;
   line-height: 1.5;
   overflow: hidden;
   display: -webkit-box;
-  line-clamp: 3; /* 정확히 3줄까지만 본문을 보여주고 너머는 숨김 */
+  -webkit-line-clamp: 3; /* 표준 브라우저 호환성을 위해 앞에 붙은 속성도 유지 */
+  line-clamp: 3; 
   -webkit-box-orient: vertical;
-  word-break: break-all; /* 영문이나 연속된 문자열도 카드 밖으로 깨져나가지 않도록 방지 */
+  word-break: break-all; 
+  
+  /* 본문 영역도 남은 공간 안에서만 줄어들 수 있도록 설정 */
+  flex-grow: 1;
+  flex-shrink: 1;
 }
 
 .memo-form {
@@ -414,7 +443,7 @@ body {
     background: #2d2d30; } 
     #memo-list li:hover { background: #3e3e42; }
 
-    /* ==========================================
+/* ==========================================
    계층형 폴더-메모 트리 구조 스타일
    ========================================== */
 .folder-container {

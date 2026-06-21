@@ -75,7 +75,6 @@ auth.onAuthStateChanged((user) => {
   }
 });
 
-// --- [1] 폴더 동기화 및 이름 변경 / 위치 변경 기능 통합 ---
 function syncFoldersAndMemos(userId) {
   db.collection('users').doc(userId).collection('folders')
     .orderBy('index', 'asc')
@@ -113,7 +112,6 @@ function syncFoldersAndMemos(userId) {
         folderItem.style.display = 'flex';
         folderItem.style.justifyContent = 'space-between';
         folderItem.style.alignItems = 'center';
-        // 부드러운 위치 전환 레이아웃을 위한 트랜지션 추가
         folderContainer.style.transition = 'all 0.2s ease';
 
         const textSpan = document.createElement('span');
@@ -147,7 +145,6 @@ function syncFoldersAndMemos(userId) {
 
         folderItem.addEventListener('click', (e) => {
           if (e.target === menuBtn) return;
-          // 기존 폴더 토글 열고닫기 로직 생략 (동일 유지)
           const isOpen = folderContainer.classList.contains('open');
           if (isOpen) {
             folderContainer.classList.remove('open');
@@ -173,8 +170,6 @@ function syncFoldersAndMemos(userId) {
 
         folderContainer.appendChild(folderItem);
         folderContainer.appendChild(nestedMemoList);
-
-        // 🌟 실시간 아이폰식 드래그 앤 드롭 구현 영역
         
         folderContainer.addEventListener('dragstart', (e) => {
           folderContainer.classList.add('dragging');
@@ -184,7 +179,6 @@ function syncFoldersAndMemos(userId) {
         folderContainer.addEventListener('dragend', () => {
           folderContainer.classList.remove('dragging');
           
-          // 3. 마우스를 놓았을 때 최종 결정된 순서대로 파이어베이스에 일괄 저장
           const finalContainers = Array.from(folderListUI.querySelectorAll('.folder-container'));
           const batch = db.batch();
           
@@ -204,24 +198,19 @@ function syncFoldersAndMemos(userId) {
     });
 }
 
-// 🌟 2. 마우스가 움직일 때 실시간으로 순서 위치를 바꾸는 전역 이벤트 리스너
 if (folderListUI) {
   folderListUI.addEventListener('dragover', (e) => {
     e.preventDefault();
     const draggingItem = folderListUI.querySelector('.dragging');
     if (!draggingItem) return;
 
-    // 현재 마우스 위치 아래에 있는 요소 낚아채기
     const siblings = Array.from(folderListUI.querySelectorAll('.folder-container:not(.dragging)'));
     
-    // 마우스 Y 좌표와 가장 가까운 타겟 형제 요소 찾기
     const nextSibling = siblings.find(sibling => {
       const box = sibling.getBoundingClientRect();
-      // 해당 요소의 수직 중간 지점보다 마우스가 위에 있는지 확인
       return e.clientY <= box.top + box.height / 2;
     });
 
-    // 조건에 맞춰 임시로 DOM 위치 바꾸기 (UI가 실시간으로 밀려남)
     if (nextSibling) {
       folderListUI.insertBefore(draggingItem, nextSibling);
     } else {
@@ -230,7 +219,6 @@ if (folderListUI) {
   });
 }
 
-// --- [2] 폴더 이름 바꾸기 함수 추가 ---
 function renameFolder(userId, folderId, oldName) {
   const newName = prompt('변경할 폴더 이름을 입력하세요:', oldName);
   if (!newName || !newName.trim() || newName.trim() === oldName) return;
@@ -240,7 +228,6 @@ function renameFolder(userId, folderId, oldName) {
   })
   .then(() => {
     console.log('폴더 이름 변경 성공');
-    // 현재 열려있는 폴더의 이름을 바꾼 경우 상단 타이틀도 같이 업데이트
     if (currentFolderId === folderId) {
       const folderTitleEl = document.getElementById('current-folder-title');
       if (folderTitleEl) folderTitleEl.innerText = newName.trim();
@@ -249,11 +236,9 @@ function renameFolder(userId, folderId, oldName) {
   .catch(error => alert('폴더 이름 변경 실패: ' + error.message));
 }
 
-// --- [3] 폴더 순서 바꾸기 함수 추가 ---
 function moveFolderOrder(userId, folderDocs, currentIndex, targetIndex) {
   const batch = db.batch();
   
-  // 현재 폴더와 대상 폴더의 위치(index)를 서로 맞바꿉니다.
   const currentFolderRef = db.collection('users').doc(userId).collection('folders').doc(folderDocs[currentIndex].id);
   const targetFolderRef = db.collection('users').doc(userId).collection('folders').doc(folderDocs[targetIndex].id);
 
@@ -330,21 +315,27 @@ function openMemoInEditor(memoId, memoData, targetLiEl = null) {
   
   currentMemoId = memoId; 
   updateCharCount(); 
+
+  // [수정지점 1] 불러올 때 인풋창들 읽기 전용 잠금 처리 및 버튼 텍스트 수정
+  const titleInput = document.getElementById('memo-title');
+  const contentInput = document.getElementById('memo-content');
+  if (titleInput) titleInput.readOnly = true;
+  if (contentInput) contentInput.readOnly = true;
+  if (saveBtn) saveBtn.innerText = '수정';
+
   switchCenterView('editor');
 }
-let dashboardListener = null;
 
+let dashboardListener = null;
 
 function renderDashboardFiles(folderId) {
   const dashboardFileList = document.getElementById('dashboard-file-list');
   if (!dashboardFileList) return;
 
-  // get() 대신 onSnapshot을 사용하여 파이어베이스의 변경사항을 실시간으로 화면에 반영합니다.
   if (dashboardListener) {
     dashboardListener(); 
   }
 
-  // 새로운 폴더에 대한 리스너를 시작하고, 그 종료 스위치를 dashboardListener에 저장
   dashboardListener = db.collection('users').doc(currentUserId).collection('memos')
     .where('folderId', '==', folderId)
     .orderBy('createdAt', 'desc')
@@ -390,43 +381,58 @@ if (addFolderBtn) {
 
     document.querySelectorAll('.nested-memo-list li').forEach(li => li.classList.remove('active-file'));
 
-    // 현재 존재하는 폴더 개수를 파악하여 새 폴더의 index 번호로 지정합니다.
     db.collection('users').doc(currentUserId).collection('folders').get()
     .then((snapshot) => {
-      const nextIndex = snapshot.size; // 현재 3개 있으면 새 폴더는 index 3이 됨
+      const nextIndex = snapshot.size; 
 
       db.collection('users').doc(currentUserId).collection('folders').add({
         name: folderName.trim(),
-        index: nextIndex // 순서 필드 추가
+        index: nextIndex 
       });
     });
   });
 }
 
-const saveBtnEl = document.getElementById('save-btn');
-// --- [4] 기존 저장 버튼 기능 변경 (이제 저장 버튼은 '작성 완료 후 대시보드로 나가기' 역할) ---
-if (saveBtnEl) {
-  saveBtnEl.onclick = function() {
+// [수정지점 2] 저장 버튼 클릭 함수 통합 제어 (수정 / 저장 기능 분기)
+const currentSaveBtn = document.getElementById('save-btn');
+if (currentSaveBtn) {
+  currentSaveBtn.onclick = function() {
     if (!currentUserId) return;
 
-    let title = document.getElementById('memo-title').value;
-    const content = document.getElementById('memo-content').value;
+    const tInput = document.getElementById('memo-title');
+    const cInput = document.getElementById('memo-content');
 
-    // 만약 완전히 비어있다면 가이드 제공
-    if (!title.trim() && !content.trim()) {
-      if (confirm("내용이 없는 빈 메모입니다. 이대로 리스트에 남겨두시겠습니까?")) {
-        clearMemoEditor();
-        if (currentFolderId) renderDashboardFiles(currentFolderId);
-        switchCenterView('dashboard');
-      }
-      return;
+    if (currentSaveBtn.innerText === '수정') {
+      if (tInput) tInput.readOnly = false;
+      if (cInput) cInput.readOnly = false;
+      if (cInput) cInput.focus();
+      currentSaveBtn.innerText = '저장';
+      return; 
     }
 
-    // 최종 정돈 후 대시보드로 탈출
-    autoSaveMemo(); 
-    clearMemoEditor();
-    if (currentFolderId) renderDashboardFiles(currentFolderId);
-    switchCenterView('dashboard');
+    if (currentSaveBtn.innerText === '저장') {
+      let title = tInput ? tInput.value : '';
+      const content = cInput ? cInput.value : '';
+
+      if (!title.trim() && !content.trim()) {
+        if (confirm("내용이 없는 빈 메모입니다. 이대로 리스트에 남겨두시겠습니까?")) {
+          clearMemoEditor();
+          if (currentFolderId) renderDashboardFiles(currentFolderId);
+          switchCenterView('dashboard');
+        }
+        return;
+      }
+
+      autoSaveMemo(); 
+      clearMemoEditor();
+      
+      if (tInput) tInput.readOnly = true;
+      if (cInput) cInput.readOnly = true;
+      currentSaveBtn.innerText = '수정';
+
+      if (currentFolderId) renderDashboardFiles(currentFolderId);
+      switchCenterView('dashboard');
+    }
   };
 }
 
@@ -564,22 +570,18 @@ if (deleteBtnEl) {
   };
 }
 
-// --- 새 메모 버튼 클릭 시: 폴더가 선택되어 있지 않으면 경고 팝업만 띄움 ---
 const newMemoBtn = document.getElementById('new-memo-btn');
 if (newMemoBtn) {
   newMemoBtn.addEventListener('click', () => {
     if (!currentUserId) return;
 
-    // 1. 현재 선택된 폴더가 있는지 확인 (기존에 클릭해서 활성화된 폴더 ID)
     let targetFolderId = currentFolderId || activeFolderId;
 
-    // 2. 선택된 폴더가 없다면 메모를 생성하지 않고 알림창만 띄운 뒤 종료
     if (!targetFolderId) {
       alert("새 메모를 작성할 폴더를 선택해주세요.");
       return;
     }
 
-    // 3. 폴더가 정상적으로 선택되어 있다면 그 폴더 안에 빈 메모 선 생성
     db.collection('users').doc(currentUserId).collection('memos').add({
       folderId: targetFolderId,
       title: "",      
@@ -590,16 +592,26 @@ if (newMemoBtn) {
     .then((docRef) => {
       console.log("선택된 폴더에 빈 메모 선 생성 성공, ID:", docRef.id);
       
-      // 에디터 폼 초기화
-      document.getElementById('memo-title').value = '';
-      document.getElementById('memo-content').value = '';
-      
-      // 현재 에디터가 추적할 메모 ID 설정
-      currentMemoId = docRef.id;
+      // [수정지점 3] 새 메모 생성 시 즉시 편집 가능하도록 잠금 풀고 '저장' 버튼 매핑
+      const titleInput = document.getElementById('memo-title');
+      const contentInput = document.getElementById('memo-content');
       const saveBtn = document.getElementById('save-btn');
-      if (saveBtn) saveBtn.setAttribute('data-current-memo-id', docRef.id);
 
-      // 에디터 화면으로 전환 및 글자수 갱신
+      if (titleInput) {
+        titleInput.value = '';
+        titleInput.readOnly = false; 
+      }
+      if (contentInput) {
+        contentInput.value = '';
+        contentInput.readOnly = false; 
+      }
+      
+      currentMemoId = docRef.id;
+      if (saveBtn) {
+        saveBtn.setAttribute('data-current-memo-id', docRef.id);
+        saveBtn.innerText = '저장'; 
+      }
+
       switchCenterView('editor');
       updateCharCount();
     })
@@ -609,14 +621,16 @@ if (newMemoBtn) {
   });
 }
 
-// --- [2] 자동 저장 로직 (입력할 때마다 실시간으로 파이어베이스에 반영) ---
 function autoSaveMemo() {
   if (!currentUserId || !currentMemoId) return;
+
+  // [수정지점 4] 읽기 전용(뷰어) 상태일 때는 실시간 타이핑 저장이 동작하지 않도록 방어막 추가
+  const contentInput = document.getElementById('memo-content');
+  if (contentInput && contentInput.readOnly) return;
 
   const title = document.getElementById('memo-title').value;
   const content = document.getElementById('memo-content').value;
 
-  // 빈 문서라도 유저가 나갔을 때 날아가지 않도록 현재 텍스트 상태를 그대로 업데이트
   db.collection('users').doc(currentUserId).collection('memos').doc(currentMemoId).update({
     title: title,
     content: content,
@@ -632,12 +646,10 @@ function autoSaveMemo() {
 
 const memoTitleInput = document.getElementById('memo-title');
 if (memoTitleInput) {
-  // 제목을 입력할 때마다 자동 저장
   memoTitleInput.addEventListener('input', autoSaveMemo);
 }
 
 if (memoContentInput) {
-  // 본문을 입력할 때마다 자동 저장 및 글자수 갱신
   memoContentInput.addEventListener('input', () => {
     autoSaveMemo();
     updateCharCount();
@@ -665,11 +677,14 @@ if (aiSummaryBtn) {
     if (aiSummaryResultBox) aiSummaryResultBox.style.display = "none";
 
     const summaryPrompt = `
-      당신은 훌륭한 요약 전문가입니다. 아래 제공되는 유저의 메모 본문을 정독하고, 핵심 내용을 가독성 좋게 요약해 주세요.
+      You are an excellent summarization expert. Please read the user's memo provided below carefully and summarize the key points in a readable format.
       
-      [규칙]
-      - 핵심 내용을 3줄 이내의 보기 좋은 글머리 기호(•) 형태로 요약하세요.
-      - 불필요한 인사말이나 부연 설명 없이, 오직 요약된 핵심 문장만 답변하세요.
+      [Rules]
+      - The language of the answer is Korean.
+      - Summarize the key points using easy-to-read bullet points (•).
+      - Please answer with only summarized key sentences, without unnecessary greetings or elaborations.
+      - Select keywords appropriately and write them at the end of your last answer in the form of '키워드: (Word), ~'.
+      - If the content written by the user is 15 characters or less, print "너무 짧아서 요약 할 수 없습니다." instead of the answer.
 
       [유저의 메모 본문]
       ${content}
@@ -821,4 +836,3 @@ if (memoBackBtnGlobal) {
     }
   });
 }
-
