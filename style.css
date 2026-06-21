@@ -12,25 +12,6 @@
     overflow-x: hidden; /* 화면이 좌우로 찢어져서 스크롤되는 현상 차단 */
   }
 
-  /* 2. 왼쪽 사이드바 (폴더 목록) */
-  .sidebar-left {
-    width: 100% !important;
-    max-height: 150px;
-    overflow-y: auto;
-    border-right: none;
-    border-bottom: 1px solid #3c3c3c;
-  }
-
-  /* 3. 오른쪽 사이드바 (정보창 등) */
-  /* 열렸을 때 화면 전체를 덮거나 메모창 아래로 밀리도록 설정하여 잘림 방지 */
-  .sidebar-right {
-    width: 100% !important;
-    height: auto;
-    max-height: 200px;
-    overflow-y: auto;
-    border-left: none;
-    border-top: 1px solid #3c3c3c;
-  }
 
   /* 4. 핵심: 중앙 메모 입력창 영역 조절 */
   .memo-form {
