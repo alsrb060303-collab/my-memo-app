@@ -75,8 +75,10 @@ auth.onAuthStateChanged((user) => {
   }
 });
 
+// --- [1] 폴더 동기화 및 이름 변경 / 위치 변경 기능 통합 ---
 function syncFoldersAndMemos(userId) {
   db.collection('users').doc(userId).collection('folders')
+    .orderBy('index', 'asc')
     .onSnapshot((folderSnapshot) => {
       if (!folderListUI) return;
       folderListUI.innerHTML = ''; 
@@ -84,12 +86,16 @@ function syncFoldersAndMemos(userId) {
 
       if (folderSnapshot.empty) {
         db.collection('users').doc(userId).collection('folders').add({
-          name: "일반 메모"
+          name: "일반 메모",
+          index: 0
         });
         return;
       }
 
-      folderSnapshot.forEach((folderDoc) => {
+      const folderDocs = [];
+      folderSnapshot.forEach(doc => folderDocs.push(doc));
+
+      folderDocs.forEach((folderDoc, currentIndex) => {
         const folderId = folderDoc.id;
         const folderData = folderDoc.data();
         
@@ -99,10 +105,36 @@ function syncFoldersAndMemos(userId) {
         const folderContainer = document.createElement('li');
         folderContainer.className = 'folder-container';
         folderContainer.setAttribute('id', `container-${folderId}`);
+        folderContainer.setAttribute('draggable', 'true');
+        folderContainer.setAttribute('data-id', folderId);
 
         const folderItem = document.createElement('div');
         folderItem.className = 'folder-item';
-        folderItem.innerText = folderData.name.startsWith('📁') ? folderData.name : `📁 ${folderData.name}`;
+        folderItem.style.display = 'flex';
+        folderItem.style.justifyContent = 'space-between';
+        folderItem.style.alignItems = 'center';
+        // 부드러운 위치 전환 레이아웃을 위한 트랜지션 추가
+        folderContainer.style.transition = 'all 0.2s ease';
+
+        const textSpan = document.createElement('span');
+        textSpan.innerText = folderData.name.startsWith('📁') ? folderData.name : `📁 ${folderData.name}`;
+        folderItem.appendChild(textSpan);
+
+        const menuBtn = document.createElement('button');
+        menuBtn.innerText = '☰';
+        menuBtn.style.background = 'none';
+        menuBtn.style.border = 'none';
+        menuBtn.style.color = '#858585';
+        menuBtn.style.cursor = 'grab';
+        menuBtn.style.padding = '4px 8px';
+        menuBtn.style.fontSize = '14px';
+
+        menuBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          renameFolder(userId, folderId, cleanName);
+        });
+
+        folderItem.appendChild(menuBtn);
         
         const nestedMemoList = document.createElement('ul');
         nestedMemoList.className = 'nested-memo-list';
@@ -113,10 +145,10 @@ function syncFoldersAndMemos(userId) {
           folderItem.classList.add('active');
         }
 
-        folderItem.addEventListener('click', () => {
+        folderItem.addEventListener('click', (e) => {
+          if (e.target === menuBtn) return;
+          // 기존 폴더 토글 열고닫기 로직 생략 (동일 유지)
           const isOpen = folderContainer.classList.contains('open');
-          document.querySelectorAll('.nested-memo-list li').forEach(li => li.classList.remove('active-file'));
-
           if (isOpen) {
             folderContainer.classList.remove('open');
             folderItem.classList.remove('active');
@@ -128,30 +160,109 @@ function syncFoldersAndMemos(userId) {
               const memoListUl = c.querySelector('.nested-memo-list');
               if (memoListUl) memoListUl.innerHTML = '';
             });
-
             folderItem.classList.add('active');
             folderContainer.classList.add('open');
             currentFolderId = folderId; 
             activeFolderId = folderId; 
-            
             fetchMemosForFolder(folderId, nestedMemoList);
-            
             const folderTitleEl = document.getElementById('current-folder-title');
             if (folderTitleEl) folderTitleEl.innerText = cleanName;
-            renderDashboardFiles(folderId);
-            switchCenterView('dashboard');
+            if (typeof applyViewSettings === 'function') applyViewSettings(folderId);
           }
         });
 
         folderContainer.appendChild(folderItem);
         folderContainer.appendChild(nestedMemoList);
-        folderListUI.appendChild(folderContainer);
 
-        if (currentFolderId === folderId) {
-          fetchMemosForFolder(folderId, nestedMemoList);
-        }
+        // 🌟 실시간 아이폰식 드래그 앤 드롭 구현 영역
+        
+        folderContainer.addEventListener('dragstart', (e) => {
+          folderContainer.classList.add('dragging');
+          e.dataTransfer.effectAllowed = 'move';
+        });
+
+        folderContainer.addEventListener('dragend', () => {
+          folderContainer.classList.remove('dragging');
+          
+          // 3. 마우스를 놓았을 때 최종 결정된 순서대로 파이어베이스에 일괄 저장
+          const finalContainers = Array.from(folderListUI.querySelectorAll('.folder-container'));
+          const batch = db.batch();
+          
+          finalContainers.forEach((container, index) => {
+            const fId = container.getAttribute('data-id');
+            const folderRef = db.collection('users').doc(userId).collection('folders').doc(fId);
+            batch.update(folderRef, { index: index });
+          });
+
+          batch.commit()
+          .then(() => console.log('최종 순서 파이어베이스 동기화 완료'))
+          .catch(error => console.error('순서 저장 실패:', error));
+        });
+
+        folderListUI.appendChild(folderContainer);
       });
     });
+}
+
+// 🌟 2. 마우스가 움직일 때 실시간으로 순서 위치를 바꾸는 전역 이벤트 리스너
+if (folderListUI) {
+  folderListUI.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    const draggingItem = folderListUI.querySelector('.dragging');
+    if (!draggingItem) return;
+
+    // 현재 마우스 위치 아래에 있는 요소 낚아채기
+    const siblings = Array.from(folderListUI.querySelectorAll('.folder-container:not(.dragging)'));
+    
+    // 마우스 Y 좌표와 가장 가까운 타겟 형제 요소 찾기
+    const nextSibling = siblings.find(sibling => {
+      const box = sibling.getBoundingClientRect();
+      // 해당 요소의 수직 중간 지점보다 마우스가 위에 있는지 확인
+      return e.clientY <= box.top + box.height / 2;
+    });
+
+    // 조건에 맞춰 임시로 DOM 위치 바꾸기 (UI가 실시간으로 밀려남)
+    if (nextSibling) {
+      folderListUI.insertBefore(draggingItem, nextSibling);
+    } else {
+      folderListUI.appendChild(draggingItem);
+    }
+  });
+}
+
+// --- [2] 폴더 이름 바꾸기 함수 추가 ---
+function renameFolder(userId, folderId, oldName) {
+  const newName = prompt('변경할 폴더 이름을 입력하세요:', oldName);
+  if (!newName || !newName.trim() || newName.trim() === oldName) return;
+
+  db.collection('users').doc(userId).collection('folders').doc(folderId).update({
+    name: newName.trim()
+  })
+  .then(() => {
+    console.log('폴더 이름 변경 성공');
+    // 현재 열려있는 폴더의 이름을 바꾼 경우 상단 타이틀도 같이 업데이트
+    if (currentFolderId === folderId) {
+      const folderTitleEl = document.getElementById('current-folder-title');
+      if (folderTitleEl) folderTitleEl.innerText = newName.trim();
+    }
+  })
+  .catch(error => alert('폴더 이름 변경 실패: ' + error.message));
+}
+
+// --- [3] 폴더 순서 바꾸기 함수 추가 ---
+function moveFolderOrder(userId, folderDocs, currentIndex, targetIndex) {
+  const batch = db.batch();
+  
+  // 현재 폴더와 대상 폴더의 위치(index)를 서로 맞바꿉니다.
+  const currentFolderRef = db.collection('users').doc(userId).collection('folders').doc(folderDocs[currentIndex].id);
+  const targetFolderRef = db.collection('users').doc(userId).collection('folders').doc(folderDocs[targetIndex].id);
+
+  batch.update(currentFolderRef, { index: targetIndex });
+  batch.update(targetFolderRef, { index: currentIndex });
+
+  batch.commit()
+  .then(() => console.log('폴더 순서 변경 성공'))
+  .catch(error => console.error('폴더 순서 변경 실패:', error));
 }
 
 function fetchMemosForFolder(folderId, targetUI) {
@@ -279,8 +390,15 @@ if (addFolderBtn) {
 
     document.querySelectorAll('.nested-memo-list li').forEach(li => li.classList.remove('active-file'));
 
-    db.collection('users').doc(currentUserId).collection('folders').add({
-      name: folderName.trim()
+    // 현재 존재하는 폴더 개수를 파악하여 새 폴더의 index 번호로 지정합니다.
+    db.collection('users').doc(currentUserId).collection('folders').get()
+    .then((snapshot) => {
+      const nextIndex = snapshot.size; // 현재 3개 있으면 새 폴더는 index 3이 됨
+
+      db.collection('users').doc(currentUserId).collection('folders').add({
+        name: folderName.trim(),
+        index: nextIndex // 순서 필드 추가
+      });
     });
   });
 }
