@@ -1,0 +1,767 @@
+html {
+  font-size: 20px; /* 16px의 125% 크기인 20px를 기본값으로 지정 */
+}
+
+/* 기본 리셋 및 어두운 테마 설정 */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Segoe UI', Malgun Gothic, sans-serif;
+}
+
+body {
+  background-color: #1e1e1e;
+  color: #d4d4d4;
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* 화면 전환 핵심: 기본적으로 모든 페이지는 숨김(display: none) */
+.page-view {
+  display: none;
+  width: 100%;
+  height: 100vh;
+}
+
+/* active 클래스가 붙은 페이지물만 화면에 표시 */
+.page-view.active {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* 공통 버튼 스타일 */
+.primary-btn {
+  background-color: #5398ff;
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: bold;
+}
+.primary-btn:hover { background-color: #0062a3; }
+
+.secondary-btn {
+  background-color: #333333;
+  color: #cccccc;
+  border: 1px solid #555;
+  padding: 6px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+}
+.secondary-btn:hover { background-color: #444444; color: white; }
+
+.text-btn {
+  background: transparent;
+  border: none;
+  color: #858585;
+  cursor: pointer;
+  margin-top: 15px;
+  text-decoration: underline;
+}
+.text-btn:hover { color: #d4d4d4; }
+
+/* ==========================================
+   1. 메인 소개 페이지 스타일
+   ========================================== */
+#main-page {
+  background: linear-gradient(135deg, #1e1e1e 0%, #111111 100%);
+}
+.welcome-box {
+  text-align: center;
+  max-width: 500px;
+}
+.welcome-box h1 {
+  font-size: 42px;
+  color: white;
+  margin-bottom: 15px;
+}
+.welcome-box p {
+  font-size: 18px;
+  color: #858585;
+  margin-bottom: 30px;
+  line-height: 1.5;
+}
+
+/* ==========================================
+   2. 로그인 페이지 스타일
+   ========================================== */
+.login-box {
+  background-color: #252526;
+  border: 1px solid #3c3c3c;
+  padding: 40px;
+  border-radius: 8px;
+  text-align: center;
+  width: 100%;
+  max-width: 400px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+}
+.login-box h2 {
+  color: white;
+  margin-bottom: 10px;
+}
+.login-box p {
+  color: #858585;
+  font-size: 14px;
+  margin-bottom: 25px;
+}
+.google-btn {
+  background-color: white;
+  color: #1f1f1f;
+  border: none;
+  padding: 12px;
+  width: 100%;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 15px;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+.google-btn:hover { background-color: #e1e1e1; }
+
+/* ==========================================
+   3. 메모 작성 페이지 스타일 (3단 구조)
+   ========================================== */
+#memo-page.active {
+  display: block; /* 3단 레이아웃을 깨뜨리지 않기 위해 block으로 변경 */
+}
+.app-container {
+  display: flex;
+  width: 100%;
+  height: 100vh;
+}
+
+/* 왼쪽 사이드바 */
+.sidebar-left {
+  width: 350px;
+  min-width: 350px;
+  max-width: 350px; /* 💡 이 줄을 추가하세요 */
+  background-color: #252526;
+  border-right: 1px solid #3c3c3c;
+  display: flex;
+  flex-direction: column;
+  padding: 20px;
+}
+/* 오른쪽 사이드바 */
+.sidebar-right {
+  width: 520px;
+  min-width: 520px;
+  max-width: 520px; /* 💡 이 줄을 추가하세요 */
+  background-color: #252526;
+  border-left: 1px solid #3c3c3c;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+.user-profile {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 15px;
+  border-bottom: 1px solid #3c3c3c;
+  margin-bottom: 20px;
+}
+.user-profile span { font-weight: bold; font-size: 14px; color: white; }
+
+.folder-directory h3 {
+  font-size: 13px;
+  color: #858585;
+  text-transform: uppercase;
+  margin-bottom: 10px;
+}
+.add-folder-btn {
+  background: #37373d;
+  color: #ccc;
+  border: none;
+  width: 100%;
+  padding: 6px;
+  border-radius: 4px;
+  cursor: pointer;
+  margin-bottom: 15px;
+  font-size: 13px;
+}
+.add-folder-btn:hover { background: #444444; color: white; }
+.folder-directory ul { list-style: none; }
+.folder-directory li {
+  padding: 8px 10px;
+  cursor: pointer;
+  border-radius: 4px;
+  margin-bottom: 4px;
+  font-size: 14px;
+}
+.folder-directory li:hover, .folder-directory li.active {
+  background-color: #37373d;
+  color: #ffffff;
+}
+
+/* 중앙 메모장 */
+.memo-center {
+  position: relative;
+  flex: 1;
+  background-color: #1e1e1e;
+  padding: 40px;
+  display: flex;
+  justify-content: center;
+}
+
+/* ==========================================
+   중앙 폴더 대시보드 및 카드 그리드 최적화
+   ========================================== */
+
+/* 폴더 대시보드 전체 틀 (자바스크립트의 flex 제어와 유기적 연동) */
+.folder-dashboard {
+  width: 100%;
+  max-width: 900px; /* 125% 환경을 고려하여 가로폭을 여유롭게 확장 */
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  padding-top: 20px;
+}
+
+.dashboard-header h2 {
+  font-size: 35px; /* 125% 확대 비율에 맞춰 타이틀 크기 보정 */
+  color: white;
+  margin-bottom: 8px;
+  font-weight: bold;
+}
+
+.dashboard-desc {
+  font-size: 18px; /* 안내 문구 가독성 확대 */
+  color: #858585;
+  margin-bottom: 40px; /* 설명 문구와 아래 카드 그리드 사이의 세로 간격 축소 */
+}
+
+/* 파일들을 카드 형태로 배치할 그리드 */
+.file-grid {
+  display: grid;
+  /* 화면 크기에 맞춰 카드가 자동으로 채워지며, 최소 240px 너비를 보장 */
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  row-gap: 60px;
+  column-gap: 20px;
+  overflow-y: auto; /* 메모 카드가 많아지면 중앙 영역 내부에서만 부드럽게 스크롤 */
+  padding-bottom: 40px;
+}
+
+/* 개별 파일 카드 스타일 */
+.file-card {
+  background-color: #252526;
+  border: 1px solid #3c3c3c;
+  border-radius: 8px;
+  padding: 24px;
+  cursor: pointer;
+  transition: background 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+  display: flex;
+  flex-direction: column;
+  height: 180px; /* 125% 글자 크기를 수용할 수 있도록 높이 상향 */
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.15);
+}
+
+/* 마우스 호버 시 부드럽게 강조되는 효과 */
+.file-card:hover {
+  background-color: #2d2d30;
+  border-color: #5398ff;
+  transform: translateY(-2px); /* 카드가 살짝 떠오르는 시각 효과 추가 */
+}
+
+.file-card h3 {
+  font-size: 22px; /* 카드 내 제목 크기 확대 */
+  color: white;
+  margin-bottom: 12px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis; /* 제목이 길면 자동으로 ... 처리 */
+  font-weight: 600;
+}
+
+.file-card p {
+  font-size: 16px; /* 카드 내 본문 요약 크기 확대 */
+  color: #aaaaaa;
+  line-height: 1.5;
+  overflow: hidden;
+  display: -webkit-box;
+  line-clamp: 3; /* 정확히 3줄까지만 본문을 보여주고 너머는 숨김 */
+  -webkit-box-orient: vertical;
+  word-break: break-all; /* 영문이나 연속된 문자열도 카드 밖으로 깨져나가지 않도록 방지 */
+}
+
+.memo-form {
+  width: 100%;
+  max-width: 900px;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+#memo-title {
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid #3c3c3c;
+  color: #ffffff;
+  font-size: 28px;
+  font-weight: bold;
+  padding-bottom: 10px;
+  margin-bottom: 20px;
+  outline: none;
+}
+#memo-content {
+  background: transparent;
+  border: none;
+  color: #d4d4d4;
+  font-size: 16px;
+  line-height: 1.6;
+  resize: none;
+  flex: 1;
+  outline: none;
+}
+.form-footer {
+  display: flex;
+  justify-content: flex-end;
+  padding-top: 15px;
+}
+
+
+.future-feature-placeholder {
+  color: #858585;
+  text-align: center;
+  font-style: italic;
+  font-size: 13px;
+}
+
+.memo-directory h3 {
+   font-size: 13px;
+   color: #858585; 
+   text-transform: uppercase; 
+   margin-bottom: 10px; } 
+   #memo-list { list-style: none; } 
+   #memo-list li { 
+    padding: 8px 10px; 
+    cursor: pointer; 
+    border-radius: 4px; 
+    margin-bottom: 4px; 
+    font-size: 14px; 
+    background: #2d2d30; } 
+    #memo-list li:hover { background: #3e3e42; }
+
+    /* ==========================================
+   계층형 폴더-메모 트리 구조 스타일
+   ========================================== */
+.folder-container {
+  margin-bottom: 5px;
+}
+
+/* 폴더 타이틀 스타일 */
+.folder-item {
+  padding: 10px;
+  cursor: pointer;
+  border-radius: 4px;
+  font-size: 14px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  transition: background 0.2s;
+}
+.folder-item:hover, .folder-item.active {
+  background-color: #37373d;
+  color: #ffffff;
+}
+
+/* 폴더 밑에 펼쳐질 하위 메모 리스트 */
+.nested-memo-list {
+  list-style: none;
+  padding-left: 20px; /* 오른쪽으로 들여쓰기하여 하위 구조 표현 */
+  margin-top: 2px;
+  margin-bottom: 8px;
+  display: none; /* 기본적으로는 숨김 처리 */
+}
+
+/* 폴더가 선택되어 active 상태일 때만 하위 메모 리스트를 펼쳐서 보여줌 */
+.folder-container.open .nested-memo-list {
+  display: block;
+}
+
+/* 하위 메모 아이템 스타일 */
+.nested-memo-list li {
+  padding: 6px 10px;
+  cursor: pointer;
+  border-radius: 4px;
+  font-size: 13px;
+  color: #aaaaaa;
+  margin-bottom: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis; /* 제목이 길면 ... 처리 */
+}
+.nested-memo-list li:hover {
+  background-color: #2d2d30;
+  color: #ffffff;
+}
+
+/* ==========================================
+   화면 잘림 없는 125% 스타일 보정
+   ========================================== */
+
+/* 1. 사이드바 내부 글자 및 버튼 크기 조정 */
+.user-profile span {
+  font-size: 21px;
+}
+.secondary-btn {
+  font-size: 16px;
+}
+.folder-directory h3 {
+  font-size: 20px;
+}
+.add-folder-btn {
+  font-size: 16px;
+  padding: 8px;
+}
+.folder-item {
+  font-size: 20px;
+}
+.nested-memo-list li {
+  font-size: 18px;
+  padding: 8px 10px;
+}
+
+/* 2. 중앙 메모 입력창 크기 조정 */
+#memo-title {
+  font-size: 35px; /* 제목 글씨 확대 */
+}
+#memo-content {
+  font-size: 24px; /* 본문 글씨 확대 */
+}
+.primary-btn {
+  font-size: 21px; /* 저장 버튼 확대 */
+  padding: 12px 26px;
+}
+
+/* 3. 우측 패널 글자 크기 조정 */
+.future-feature-placeholder {
+  font-size: 20px;
+}
+
+/* ==========================================
+   우측 사이드바(추후 기능 추가 공간) 확대 보정
+   ========================================== */
+
+.future-feature-placeholder {
+  font-size: 28px; /* 💡 안내 문구 글자 크기도 큼직하게 확대 */
+  line-height: 1.6;
+  color: #9cdcfe; /* 팁: VS Code 느낌의 예쁜 하늘색으로 포인트를 줬어요 */
+  font-weight: 500;
+}
+
+/* ==========================================
+   실시간 글자 수 카운터 스타일
+   ========================================== */
+.form-footer {
+  display: flex;
+  justify-content: space-between; /* 글자 수는 왼쪽, 저장 버튼은 오른쪽에 배치 */
+  align-items: center;
+  padding-top: 15px;
+}
+
+.char-counter {
+  font-size: 15px;
+  color: #858585; /* 차분한 회색조 */
+  background-color: #252526;
+  padding: 6px 14px;
+  border-radius: 4px;
+  border: 1px solid #3c3c3c;
+  font-weight: 500;
+}
+
+#char-count {
+  color: #a6eaff; /* 숫자는 예쁜 파란색으로 포인트 */
+  font-weight: bold;
+}
+
+/* ==========================================
+   좌측 하단 메모 수정/삭제 버튼 스타일
+   ========================================== */
+.memo-control-box {
+  margin-top: 20px;
+  display: flex;
+  gap: 10px; /* 버튼 사이 간격 */
+}
+
+.control-btn {
+  flex: 1;
+  padding: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.1s;
+}
+
+.control-btn:active {
+  transform: scale(0.98);
+}
+
+/* 삭제 버튼: 경고 의미를 담은 딥 레드 */
+.delete-btn {
+  background-color: #9a0007;
+  color: #ffffff;
+}
+.delete-btn:hover {
+  background-color: #c62828;
+}
+
+
+/* 폴더 디렉토리 영역도 내부에서 세로 가득 채우기 */
+.folder-directory {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding-bottom: 20px;
+}
+
+/* 폴더 리스트가 공간을 다 차지하게 해서 버튼을 맨 아래로 밀어냅니다 */
+#folder-list {
+  flex: 1;
+  overflow-y: auto; /* 폴더가 많아지면 이 안에서만 스크롤이 생김 */
+  margin-bottom: 15px;
+}
+
+/* 버튼 박스를 무조건 맨 최하단에 고정 */
+.memo-control-box {
+  margin-top: auto;
+  display: flex;
+  width: 100%; /* 가로 꽉 채우기 */
+}
+
+.editor-buttons {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 15px;
+}
+
+/* 두 버튼의 외형과 폰트 크기를 완벽하게 일치시킵니다 */
+#new-memo-btn, #select-mode-btn {
+  color: white;
+  border: none;
+  padding: 7px 2px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px; /* 여기에 원하는 폰트 크기(예: 14px 또는 0.9rem 등)를 직접 지정하세요! */
+}
+
+/* 새 메모 작성 버튼 전용 색상 */
+#new-memo-btn {
+  background-color: #009c41; /* 상큼한 초록색 계열 */
+}
+
+/* 메모 선택 버튼 전용 색상 */
+#select-mode-btn {
+  background-color: #64748b; /* 원하는 평소 색상으로 변경 가능 */
+}
+
+/* 선택 모드가 활성화되었을 때 (취소 상태) 색상 */
+#select-mode-btn.active {
+  background-color: #ef4444; /* 취소 상태일 때의 배경색 */
+}
+
+.memo-checkbox {
+  display: none; 
+  margin-right: 6px;
+  cursor: pointer;
+  vertical-align: middle;
+}
+
+/* 중요: 선택 모드가 활성화되었을 때 체크박스를 보이게 만드는 규칙 */
+.select-mode-active .memo-checkbox {
+  display: inline-block !important;
+}
+
+/* 메모 트리 내 체크박스 여백 */
+.memo-checkbox {
+  margin-right: 8px;
+  cursor: pointer;
+  vertical-align: middle;
+}
+.memo-tree-item span {
+  vertical-align: middle;
+}
+
+
+.nested-memo-list li.active-file {
+  background-color: #d7d7d722 !important; /* 배경 */
+  color: #ffffff !important;            /*  글자 */         /* 글자를 두껍게 강조 */
+  border-left: 4px solid #f4f4f400;       /* 왼쪽에 세로 포인트 선 추가 */
+  padding-left: 8px;                    /* 선과 글자 사이 여백 */
+  border-radius: 4px;                   /* 모서리를 살짝 둥글게 */
+}
+
+/* =================================
+      AI 도구 패널 스타일 스타일
+   ================================= */
+.ai-tools-container {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.ai-tools-container h3 {
+  margin: 0;
+  font-size: 1.2rem;
+  color: #7c97c2;
+}
+
+.ai-desc {
+  font-size: 0.85rem;
+  color: #64748b;
+  margin: 0;
+}
+
+.ai-divider {
+  border: 0;
+  border-top: 1px solid #e2e8f0;
+  margin: 5px 0;
+}
+
+.ai-section h4 {
+  margin: 0 0 10px 0;
+  font-size: 0.95rem;
+  color: #4273b7;
+}
+
+/* AI 액션 버튼 (요약하기 등) */
+.ai-action-btn {
+  width: 100%;
+  background-color: #6366f1; /* 보라/인디고 계열 */
+  color: white;
+  border: none;
+  padding: 10px;
+  border-radius: 6px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.ai-action-btn:hover {
+  background-color: #4f46e5;
+}
+
+.ai-action-btn:disabled {
+  background-color: #cbd5e1;
+  cursor: not-allowed;
+}
+
+/* 결과창 상자 */
+.ai-result-box {
+  margin-top: 15px;
+  background-color: #cecece;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  padding: 12px;
+}
+
+.ai-result-box h5 {
+  margin: 0 0 8px 0;
+  color: #475569;
+  font-size: 0.85rem;
+}
+
+.ai-result-text {
+  font-size: 0.9rem;
+  color: #0f172a;
+  line-height: 1.5;
+  white-space: pre-wrap; /* 줄바꿈 유지 */
+  margin-bottom: 12px;
+}
+
+/* 결과 저장 버튼 */
+.ai-save-btn {
+  width: 100%;
+  background-color: #795aea; /* 보라색 계열 */
+  color: white;
+  border: none;
+  padding: 10px;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.ai-save-btn:hover {
+  background-color: #4f46e5;
+}
+
+/* ==========================================
+   ↔️ 사이드바 접기/펴기(최소화) 스타일
+   ========================================== */
+
+/* 1. 사이드바 전체 틀 조절 선언부 */
+.sidebar-left, .sidebar-right {
+  position: relative;
+  /* 속도 조절: 0.7s(초) 값을 늘리면 더 느리게, 줄이면 더 빠르게 들어갑니다 */
+  transition: width 0.7s cubic-bezier(0.25, 0.8, 0.25, 1), 
+              min-width 0.7s cubic-bezier(0.25, 0.8, 0.25, 1), 
+              padding 0.7s ease;
+}
+
+/* 2. 닫혔을 때의 사이드바 상태 */
+.sidebar-left.collapsed, .sidebar-right.collapsed {
+  width: 0px !important;
+  min-width: 0px !important;
+  max-width: 0px !important;
+  padding: 0px !important; /* 닫힐 때는 패딩을 완전히 0으로 밀어주는 것이 깔끔합니다 */
+}
+
+/* 3. 토글 버튼 기본 외형 및 속도 조절 */
+.sidebar-toggle-btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 24px;  /* 버튼 너비 */
+  height: 48px; /* <--- 버튼 높이: 더 길게 만들고 싶다면 이 값을 키우세요 */
+  background-color: #37373d;
+  color: #cccccc;
+  border: 1px solid #3c3c3c;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  z-index: 10;
+  transition: background-color 0.2s, color 0.2s;
+}
+
+/* 4. 핵심: 버튼 위치 조절 (열렸을 때나 닫혔을 때나 이 값 하나로 고정) */
+.left-trigger {
+  /* 버튼 너비가 24px이므로 -24px을 주면 사이드바 경계선 바깥으로 완전히 튀어나와 굳건히 고정됩니다 */
+  right: -24px !important; 
+  border-radius: 0 8px 8px 0;
+}
+
+.right-trigger {
+  /* 오른쪽 버튼도 마찬가지로 너비만큼 왼쪽 바깥으로 완전히 빼줍니다 */
+  left: -24px !important; 
+  border-radius: 8px 0 0 8px;
+}
+
+/* 5. 내부 알맹이 컨텐츠들의 부드러운 투명도 처리 */
+.sidebar-left > *:not(.sidebar-toggle-btn),
+.sidebar-right > *:not(.sidebar-toggle-btn) {
+  /* 알맹이가 사라지는 속도: 사이드바 전체 속도(0.4s)보다 살짝 빠르게(0.2s~0.3s) 잡는 것이 자연스럽습니다 */
+  transition: opacity 0.1s ease, transform 0.1s ease;
+  opacity: 1;
+}
+
+/* 6. 사이드바가 닫혔을 때 내부 알맹이 숨김 상태 */
+.sidebar-left.collapsed > *:not(.sidebar-toggle-btn),
+.sidebar-right.collapsed > *:not(.sidebar-toggle-btn) {
+  opacity: 0;
+  pointer-events: none;
+  transform: scale(0.2); /* 사라질 때 약간 작아지는 효과 (원치 않으시면 이 줄을 지우세요) */
+}
