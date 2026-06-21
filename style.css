@@ -7,8 +7,8 @@
   .app-container {
     display: flex;
     flex-direction: column; 
-    height: 100vh;
-    width: 100vw;
+    height: auto;
+    width: auto;
     overflow-x: hidden; /* 화면이 좌우로 찢어져서 스크롤되는 현상 차단 */
   }
 
